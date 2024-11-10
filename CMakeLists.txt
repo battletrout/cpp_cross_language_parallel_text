@@ -18,7 +18,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Find required packages
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system locale)
 find_package(fmt REQUIRED)
 
 # Add include directories
@@ -37,6 +37,7 @@ add_library(${PROJECT_NAME} STATIC ${SOURCES})
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     ${Boost_LIBRARIES}
     fmt::fmt
+    Boost::locale
 )
 target_include_directories(${PROJECT_NAME} PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -48,5 +49,6 @@ target_link_libraries(${PROJECT_NAME}_exe PRIVATE
     ${PROJECT_NAME}
     ${Boost_LIBRARIES}
     fmt::fmt
+    Boost::locale
 )
 set_target_properties(${PROJECT_NAME}_exe PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")
