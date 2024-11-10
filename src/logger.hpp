@@ -13,7 +13,7 @@ namespace debug_custom {
     };
 
     template<typename... Args>
-    void log(LogLevel level, std::string_view format, Args&&... args) {
+    void log(LogLevel level, const std::string_view format, Args&&... args) {
         auto now = std::chrono::system_clock::now();
         const char* level_str;
         
