@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <string_view>
 
 struct StringCouplet {
     std::string_view a;
@@ -9,16 +10,50 @@ struct StringCouplet {
 };
 
 class FileParser {
-
 public:
-    //Take a filepath as a string for the initializer
-    FileParser(const std::string &filepath, bool log_enabled) {};
+    // Constructor
+    FileParser(const std::string &filepath, bool log_enabled) : 
+        stream_(filepath, std::ifstream::in) {
+        // log_enabled could be stored as member if needed
+    }
 
-    std::string_view readLine();
-    StringCouplet separateLine(const char separator);
-     
+    // Rule of 5
+    ~FileParser() {
+        if (stream_.is_open()) {
+            stream_.close();
+        }
+    }
+    
+    // Delete copy operations - file streams aren't copyable
+    FileParser(const FileParser&) = delete;
+    FileParser& operator=(const FileParser&) = delete;
+    
+    // Move operations
+    FileParser(FileParser&& other) noexcept : 
+        stream_(std::move(other.stream_)),
+        current_line_(std::move(other.current_line_)) {}
+    
+    FileParser& operator=(FileParser&& other) noexcept {
+        if (this != &other) {
+            if (stream_.is_open()) {
+                stream_.close();
+            }
+            stream_ = std::move(other.stream_);
+            current_line_ = std::move(other.current_line_);
+        }
+        return *this;
+    }
+
+    // Original interface
+    std::string_view read_line();
+    StringCouplet separate_line(const char separator);
+
+    // Helper methods
+    bool is_open() const { return stream_.is_open(); }
+    bool good() const { return stream_.good(); }
+    bool eof() const { return stream_.eof(); }
 
 private:
-    std::fstream _stream;
-
+    std::fstream stream_;
+    std::string current_line_;
 };
