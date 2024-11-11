@@ -1,30 +1,17 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <iomanip> // for pretty printing
 #include <string>
 
-// #include 
-//Public includes
 #include "logger.hpp"
-// #include "fileParser.hpp"
 #include "tokenizer.hpp"
 #include "textUtils.hpp"
 #include "pmiAggregator.hpp"
-//Private includes
-//#include "core/socketServer.cpp"
-//#include "core/async.cpp"
 
-
-
-// Function definition
-void timer_expired(const std::string_view &id) {
-    debug_custom::log(debug_custom::LogLevel::ERROR, id);
-}
 
 
 int main() {
-    // log(debug_custom::LogLevel::ERROR,"Error Test");
+    log(debug_custom::LogLevel::INFO,"Start...");
     
     std::string greek_filepath{"greek.tsv"};
     std::ifstream stream{greek_filepath, std::ios::in};
@@ -35,19 +22,14 @@ int main() {
     Tokenizer tok_eng(eng_locale);
 
     PmiAggregator aggregator;
-    // Nested map[english][greek] = count
-    // std::unordered_map<std::string, std::unordered_map<std::string, uint32_t>> eng_to_grk_words;
-    // // Map to store count of docs with english words
-    // std::unordered_map<std::string, uint32_t> eng_words;
-    // // Map to store count of docs with greek words
-    // std::unordered_map<std::string, uint32_t> grk_words;   
+
     auto text_pairs = ParallelTextParser::parse_file(greek_filepath);
 
     size_t line_id{0};
     for (const auto& [greek, english] : text_pairs) {
+        //for each line: skip if either grk or eng is empty. Otherwise...
         if (greek.empty() || english.empty()) continue;
         
-        //For each line
         aggregator.total_doc_count++;
         //generate sets of tokens (unique vals only)
         auto eng_tokens = tok_eng.tokenize(english);
@@ -74,12 +56,10 @@ int main() {
         }
     }
         
-    // for (const auto& [grk_word, count] : eng_to_grk_words["the"]) {
-    //     std::cout << grk_word << ": " << count << std::endl;
-    // }
-    std::cout << aggregator.eng_to_grk_words["airplane"]["αεροπλάνο"] <<std::endl;
-    std::cout << aggregator.grk_words["αεροπλάνο"] <<std::endl;
-    std::cout << aggregator.eng_words["airplane"] <<std::endl;
+    //DEBUG -- verify that values are being stored correctly -- fixed 11/10/24
+    // std::cout << aggregator.eng_to_grk_words["airplane"]["αεροπλάνο"] <<std::endl;
+    // std::cout << aggregator.grk_words["αεροπλάνο"] <<std::endl;
+    // std::cout << aggregator.eng_words["airplane"] <<std::endl;
     //PART C: Calculate for Airplane
     auto [A, B, C, pmi] = aggregator.calc_PMI("airplane","αεροπλάνο");
     fmt::print("For airplane to αεροπλάνο\nA: {}, B: {}, C: {}, PMI: {}\n\n", A, B, C, pmi);
@@ -87,11 +67,23 @@ int main() {
     //PART D: Calculate candidates for english words 
     for (const auto& eng_word : {"telephone","swimming","helicopter","washington","bulgarian"}) {
         std::cout << eng_word << " candidates: \n";
+        //rank translations, but print from inside the function
         auto _ = aggregator.rank_translations(eng_word, 5, true);
         std::cout << "\n\n";
     }
 
     //PART E: Calculate top-1 for English words that occur in 90 - 100 sentences
-    
+    //Loop over all english words, and calculate PMI for the ones with {90 =< count < 100} 
+    //Output format for csv
+    fmt::print("English,Greek,A,B,C,PMI\n");
+    for (const auto& [eng_word, count] : aggregator.eng_words) {
+        if (count >= 90 && count < 100) {
+            //rank top 1 translation, don't print from inside function
+            auto top_rank_vec = aggregator.rank_translations(eng_word, 1, false);
+            auto [grk_word,A,B,C,pmi] = top_rank_vec[0];
+            fmt::print("{},{},{},{},{},{:.4f}\n", eng_word, grk_word, A,B,C,pmi);
+        }
+    }
+    log(debug_custom::LogLevel::INFO,"Done!");
     return 0;
 }
