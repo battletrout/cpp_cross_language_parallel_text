@@ -71,12 +71,33 @@ int main() {
             debug_custom::log(debug_custom::LogLevel::INFO, fmt::format("processed line: {}",line_id));
         }
     }
-        // for (const auto& grk_token : grk_tokens) {
-        //     std::cout << grk_token << ": " << grk_tokens[grk_token] << std::endl;
-        // }
-    for (const auto& [grk_word, count] : eng_to_grk_words["the"]) {
-        std::cout << grk_word << ": " << count << std::endl;
-    }
+        
+    // for (const auto& [grk_word, count] : eng_to_grk_words["the"]) {
+    //     std::cout << grk_word << ": " << count << std::endl;
+    // }
+
+    //Calculate for Airplane
+    int A = eng_to_grk_words["airplane"]["αεροπλάνο"];
+    int B = eng_words["airplane"];
+    int C = grk_words["αεροπλάνο"];
+    int N = line_id;
+    float pmi = std::log2((N * A) /((A+B)*(A+C)));
+    fmt::print("For airplane to αεροπλάνο\nA: {}, B: {}, C: {}, PMI: {}", A, B, C, pmi);
+
+    A = eng_to_grk_words["bulgarian"]["βούλγαρος"];
+    B = eng_words["bulgarian"];
+    C = grk_words["βούλγαρος"];
+    N = line_id;
+    pmi = std::log2((N * A) /((A+B)*(A+C)));
+    fmt::print("For bulgarian to βούλγαρος\nA: {}, B: {}, C: {}, PMI: {}", A, B, C, pmi);
+    //return std::tuple{A,B,C,pmi};
+
+    A = eng_to_grk_words["bulgarian"]["βουλγαρικού"];
+    B = eng_words["bulgarian"];
+    C = grk_words["βουλγαρικού"];
+    N = line_id;
+    pmi = std::log2((N * A) /((A+B)*(A+C)));
+    fmt::print("For bulgarian to βουλγαρικού\nA: {}, B: {}, C: {}, PMI: {}", A, B, C, pmi);
 
         // print_coll(grk_tokens);
         // std::cout << std::endl;
