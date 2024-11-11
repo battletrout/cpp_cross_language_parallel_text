@@ -74,7 +74,7 @@ int main() {
         // for (const auto& grk_token : grk_tokens) {
         //     std::cout << grk_token << ": " << grk_tokens[grk_token] << std::endl;
         // }
-    for (const auto& [grk_word, count] : grk_words) {
+    for (const auto& [grk_word, count] : eng_to_grk_words["the"]) {
         std::cout << grk_word << ": " << count << std::endl;
     }
 
