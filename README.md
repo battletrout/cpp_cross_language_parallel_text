@@ -2,7 +2,7 @@
 JHU Fall '24 Information Retrieval Project 5
 
 ## Overview
-A simple experiment processing a bunch of unicode text in c++ into bags-of-words to find likely candidates for translation dictionaries between English and Greek texts. Works based off Pointwise Mutual Information, calculated from the common occurrences of words in parallel texts.
+A simple experiment processing a bunch of unicode text in c++ into bags-of-words to find likely candidates for translation dictionaries between English and Greek texts. Ranks candidate translations based off Pointwise Mutual Information (https://en.wikipedia.org/wiki/Pointwise_mutual_information).
 
 ## Technical Approach
 - Docker dev container using cpp:1-debian-11.
