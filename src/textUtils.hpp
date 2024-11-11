@@ -129,9 +129,4 @@ public:
     }
 };
 
-struct WordPairCounts {
-    uint32_t cooccurrences;  // A in the table
-    uint32_t first_only;     // B in the table
-    //C in the table comes from the opposite word pair map
-};
 

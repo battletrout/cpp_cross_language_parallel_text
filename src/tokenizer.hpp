@@ -3,6 +3,7 @@
 #include <unicode/utf8.h>
 #include <string>
 #include <vector>
+#include <set>
 
 class Tokenizer {
 public:
@@ -19,8 +20,8 @@ public:
         }
     }
 
-    std::vector<std::string> tokenize(std::string_view text) const {
-        std::vector<std::string> tokens;
+    std::set<std::string> tokenize(std::string_view text) const {
+        std::set<std::string> tokens;
         UErrorCode status = U_ZERO_ERROR;
         
         // Explicitly specify UTF-8 encoding when creating UnicodeString
@@ -47,7 +48,7 @@ public:
                 !std::all_of(token.begin(), token.end(), 
                 [](unsigned char c) { return std::isdigit(c); })) 
             { 
-                tokens.push_back(token);
+                tokens.emplace(token);
             }
             
             start = end;
