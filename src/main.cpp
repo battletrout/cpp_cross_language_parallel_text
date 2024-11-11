@@ -8,19 +8,35 @@
 #include "textUtils.hpp"
 #include "pmiAggregator.hpp"
 
-
-
-int main() {
+int main(int argc,      // Number of strings in array argv
+          char *argv[],   // Array of command-line argument strings
+          char *envp[] )  // Array of environment variable strings) 
+          {
     log(debug_custom::LogLevel::INFO,"Start...");
     
-    std::string greek_filepath{"greek.tsv"};
-    std::ifstream stream{greek_filepath, std::ios::in};
+    int count;
+    // Display each command-line argument.
+    std::cout << "\nCommand-line arguments:\n";
+    for( count = 0; count < argc; count++ )
+         std::cout << "  argv[" << count << "]   "
+                << argv[count] << "\n";
 
+    // take greek filepath as arg if there, otherwise default to greek.tsv
+    std::string greek_filepath{};
+    if (argc > 1) {
+        greek_filepath = argv[1];
+    } else {
+        greek_filepath = "greek.tsv";
+    }
+    log(debug_custom::LogLevel::INFO,greek_filepath);
+
+    //Initialize tokenizers with english and greek localities
     std::string greek_locale{"el_GR.UTF-8"};
     std::string eng_locale{"en_US.UTF-8"};
     Tokenizer tok_grk(greek_locale);
     Tokenizer tok_eng(eng_locale);
 
+    //Initialize pmi aggregator
     PmiAggregator aggregator;
 
     auto text_pairs = ParallelTextParser::parse_file(greek_filepath);
