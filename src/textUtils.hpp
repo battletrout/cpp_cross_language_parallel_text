@@ -11,6 +11,7 @@
 #include <fstream>
 #include <utility>
 #include <vector>
+#include <tuple>
 
 
 
@@ -19,6 +20,8 @@
 // void print_coll(Args&&... args) {
 //     std::cout << args << print_iterator(args)
 // }
+
+
 
 
 struct StringCouplet {
