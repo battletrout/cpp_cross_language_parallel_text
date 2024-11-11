@@ -40,8 +40,13 @@ public:
             // Explicitly convert back to UTF-8
             utext.tempSubStringBetween(start, end).toUTF8String(token);
             
+            // Add the token if it's not empty, not punctuation, and not a digit
+
             if (!token.empty() && !std::all_of(token.begin(), token.end(), 
-                [](unsigned char c) { return std::isspace(c) || std::ispunct(c); })) {
+                [](unsigned char c) { return std::isspace(c) || std::ispunct(c); }) &&
+                !std::all_of(token.begin(), token.end(), 
+                [](unsigned char c) { return std::isdigit(c); })) 
+            { 
                 tokens.push_back(token);
             }
             

@@ -23,44 +23,38 @@ void timer_expired(const std::string_view &id) {
 
 
 int main() {
-    log(debug_custom::LogLevel::ERROR,"Error Test",6,2031.2);
-    // debug_custom::log(debug_custom::LogLevel::SUCCESS,"Success Test");
-    // debug_custom::log(debug_custom::LogLevel::INFO,"Info Test");
+    // log(debug_custom::LogLevel::ERROR,"Error Test");
     
     std::string greek_filepath{"greek.tsv"};
-
     std::ifstream stream{greek_filepath, std::ios::in};
 
-    //FileParser parser(greek_filepath);
-    //std::cout << parser.read_line() << "\n";
-    //"en_US.UTF-8" or "el_GR.UTF-8"
     std::string greek_locale{"el_GR.UTF-8"};
     std::string eng_locale{"en_US.UTF-8"};
     Tokenizer tok_grk(greek_locale);
     Tokenizer tok_eng(eng_locale);
 
-    char tab_sep ='\t';
+    // 
+    std::unordered_map<std::string, std::unordered_map<std::string, WordPairCounts>> greek_to_english;
+    std::unordered_map<std::string, std::unordered_map<std::string, WordPairCounts>> english_to_greek;
+    auto text_pairs = ParallelTextParser::parse_file(greek_filepath);
 
-auto text_pairs = ParallelTextParser::parse_file(greek_filepath);
+    size_t line_id{0};
+    for (const auto& [greek, english] : text_pairs) {
+        if (greek.empty() || english.empty()) continue;
+        
+        //For each line
+        line_id++;
+        auto eng_tokens = tok_eng.tokenize(english);
+        auto grk_tokens = tok_grk.tokenize(greek);
+        
+        print_coll(grk_tokens);
+        print_coll(eng_tokens);
 
-for (const auto& [greek, english] : text_pairs) {
-    if (greek.empty() || english.empty()) continue;
-    
-    auto eng_tokens = tok_eng.tokenize(english);
-    auto grk_tokens = tok_grk.tokenize(greek);
-    
-    print_coll(grk_tokens);
-    print_coll(eng_tokens);
-    //break;  // Remove this break when you're ready to process all lines
-}
+        //iterate through the vectors
+        
 
-    // // Use for either language
-    // auto tokens1 = tok_eng.tokenize("Hello, World!");
-
-    // // or
-    // auto tokens = tok_greek.tokenize("Γεια σας, κόσμε!");
-    // std::cout << tokens[2];
-
+        //break;  
+        }
 
     return 0;
 }
