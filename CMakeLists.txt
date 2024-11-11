@@ -20,12 +20,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Find required packages
 find_package(Boost REQUIRED COMPONENTS system locale)
 find_package(fmt REQUIRED)
-
-# Add include directories
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${Boost_INCLUDE_DIRS}
-)
+find_package(ICU REQUIRED COMPONENTS uc i18n)
 
 # Collect source files
 file(GLOB_RECURSE SOURCES 
@@ -34,21 +29,34 @@ file(GLOB_RECURSE SOURCES
 
 # Create main library
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
-target_link_libraries(${PROJECT_NAME} PRIVATE 
+target_link_libraries(${PROJECT_NAME} 
+    PUBLIC 
     ${Boost_LIBRARIES}
-    fmt::fmt
+    fmt::fmt-header-only
+    Boost::system
     Boost::locale
+    ICU::uc 
+    ICU::i18n
+    -pthread
 )
-target_include_directories(${PROJECT_NAME} PUBLIC 
+target_include_directories(${PROJECT_NAME} 
+    PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${Boost_INCLUDE_DIRS}
+    ${ICU_INCLUDE_DIRS}
 )
 
 # Create executable
 add_executable(${PROJECT_NAME}_exe src/main.cpp)
-target_link_libraries(${PROJECT_NAME}_exe PRIVATE 
+target_link_libraries(${PROJECT_NAME}_exe 
+    PRIVATE 
     ${PROJECT_NAME}
-    ${Boost_LIBRARIES}
-    fmt::fmt
-    Boost::locale
 )
 set_target_properties(${PROJECT_NAME}_exe PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")
+
+# Add compile definitions
+target_compile_definitions(${PROJECT_NAME} 
+    PUBLIC 
+    BOOST_ALL_NO_LIB
+    FMT_HEADER_ONLY
+)

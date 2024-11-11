@@ -1,57 +1,57 @@
-#include <ranges>
+#include <unicode/brkiter.h>
+#include <unicode/unistr.h>
+#include <unicode/utf8.h>
 #include <string>
-#include <string_view>
-#include <boost/locale.hpp>
+#include <vector>
 
 class Tokenizer {
 public:
-    // initialize tokenizer with "en_US.UTF-8" or "el_GR.UTF-8"
     Tokenizer(const std::string& locale_string) {
-        static bool initialized = false;
-        if (!initialized) {
-            // Do this setup only once, not per tokenizer
-            std::ios_base::sync_with_stdio(false);
-            std::cout.imbue(std::locale(""));
-            std::wcout.imbue(std::locale(""));
-            initialized = true;
-        };
-        boost::locale::generator gen;
-        m_locale = gen(locale_string); 
-    }
-    // tokenize method using instance's locale
-    std::vector<std::string> tokenize(std::string_view text) const {
-        auto lowered = boost::locale::to_lower(std::string{text}, m_locale);
-        std::vector<std::string> tokens;
-        
-        std::string current_token;
-        for (char c : lowered) {
-            if (std::isspace(c)) {
-                if (!current_token.empty()) {
-                    tokens.push_back(current_token);
-                    current_token.clear();
-                }
-            } else if (!std::ispunct(c)) {
-                current_token += c;
-            }
+        UErrorCode status = U_ZERO_ERROR;
+        m_break_iterator.reset(
+            icu::BreakIterator::createWordInstance(
+                icu::Locale(locale_string.c_str()), 
+                status
+            )
+        );
+        if (U_FAILURE(status)) {
+            throw std::runtime_error("Failed to create break iterator");
         }
-        if (!current_token.empty()) {
-            tokens.push_back(current_token);
+    }
+
+    std::vector<std::string> tokenize(std::string_view text) const {
+        std::vector<std::string> tokens;
+        UErrorCode status = U_ZERO_ERROR;
+        
+        // Explicitly specify UTF-8 encoding when creating UnicodeString
+        icu::UnicodeString utext = icu::UnicodeString::fromUTF8(
+            icu::StringPiece(text.data(), text.length())
+        );
+
+        icu::UnicodeString lower_case = utext.toLower();
+        // Set tolower
+        m_break_iterator->setText(lower_case);
+        
+        int32_t start = m_break_iterator->first();
+        int32_t end = m_break_iterator->next();
+        
+        while (end != icu::BreakIterator::DONE) {
+            std::string token;
+            // Explicitly convert back to UTF-8
+            utext.tempSubStringBetween(start, end).toUTF8String(token);
+            
+            if (!token.empty() && !std::all_of(token.begin(), token.end(), 
+                [](unsigned char c) { return std::isspace(c) || std::ispunct(c); })) {
+                tokens.push_back(token);
+            }
+            
+            start = end;
+            end = m_break_iterator->next();
         }
         
         return tokens;
     }
 
 private:
-    std::locale m_locale;  // Store locale as member variable
-
-    static std::string clean_token(std::string_view sv) {
-        std::string cleaned;
-        cleaned.reserve(sv.size());
-        for (char c : sv) {
-            if (!std::ispunct(static_cast<unsigned char>(c))) {
-                cleaned += c;
-            }
-        }
-        return cleaned;
-    }
+    std::unique_ptr<icu::BreakIterator> m_break_iterator;
 };

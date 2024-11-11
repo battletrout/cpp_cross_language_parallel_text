@@ -12,9 +12,9 @@ struct StringCouplet {
 class FileParser {
 public:
     // Constructor
-    FileParser(const std::string &filepath, bool log_enabled) : 
+    FileParser(const std::string &filepath) : 
         stream_(filepath, std::ifstream::in) {
-        // log_enabled could be stored as member if needed
+        
     }
 
     // Rule of 5
@@ -46,7 +46,7 @@ public:
 
     // Original interface
     std::string_view read_line();
-    StringCouplet separate_line(const char separator);
+    static StringCouplet separate_line(const char separator);
 
     // Helper methods
     bool is_open() const { return stream_.is_open(); }

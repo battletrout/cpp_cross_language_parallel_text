@@ -18,18 +18,18 @@ std::string_view FileParser::read_line() {
     return std::string_view();
 }
 
-StringCouplet FileParser::separate_line(const char separator) {
-    // Find first tab
-    size_t tab_pos = current_line_.find(separator);
+// StringCouplet FileParser::separate_line(const char separator) {
+//     // Find first tab
+//     size_t tab_pos = current_line_.find(separator);
     
-    if (tab_pos == std::string::npos) {
-        // Handle no separator - could throw or return empty views
-        return StringCouplet{std::string_view(), std::string_view()};
-    }
+//     if (tab_pos == std::string::npos) {
+//         // Handle no separator - could throw or return empty views
+//         return StringCouplet{std::string_view(), std::string_view()};
+//     }
 
-    return StringCouplet{
-        std::string_view(current_line_.data(), tab_pos),
-        std::string_view(current_line_.data() + tab_pos + 1, 
-                        current_line_.length() - tab_pos - 1)
-    };
-}
+//     return StringCouplet{
+//         std::string_view(current_line_.data(), tab_pos),
+//         std::string_view(current_line_.data() + tab_pos + 1, 
+//                         current_line_.length() - tab_pos - 1)
+//     };
+// }
